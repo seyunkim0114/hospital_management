@@ -1,8 +1,9 @@
 from sqlalchemy.schema import CreateSchema
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Integer, String, Column, MetaData, Table
+from sqlalchemy import create_engine, ForeignKey, Date, Integer, String, Column, MetaData, Table, Boolean
 from sqlalchemy import CheckConstraint, insert, Enum
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
+
 
 import enum
 # from sqlalchemy import Column
@@ -73,6 +74,68 @@ class Hospital(Base):
 
     def __repr__(self):
         return f'<hospital(room_id={self.room_id}, type={self.room_type}'
+
+
+"""
+Define Patient Table
+"""
+class Patient(Base):
+    __tablename__ = "patient"
+
+    patient_id = Column(Integer, primary_key=True)
+    room_id = Column(Integer, ForeignKey("hospital.room_id"))
+    dob = Column(Date)
+    # doctor_id = Column(Integer, ForeignKey("doctor"))
+    # address
+    guardian_first_name = Column(String)
+    guardian_last_name = Column(String)
+    guardian_contact = Column(Integer)
+    patient_contact = Column(Integer)
+    symptoms = Column(String, nullable=False)
+    diagnosis = Column(String)
+    # department = Column(String, foreign_key=True)
+    discharged = Column(Boolean, nullable=False)
+    
+    Hospital = relationship(patient_id, )
+
+    def __repr__(self):
+        return ""
+
+     
+
+"""
+Define Schedule Table
+    This table will hold general information of the patient's medication tracking
+"""
+class RepeatTypes(enum.Enum):
+    once = 1
+    daily = 2
+    weekly = 3
+    monthly = 4
+    yearly = 5
+
+
+class Schedule(Base):
+    __tablename__ = "schedule"
+
+    patient_id = Column(Integer, primary_key=True, foreign_key=True)
+    med_id = Column(Integer, primary_key=True)
+    schedule_id = Column(Integer, primary_key=True)
+    scheduled_by = Column(Integer, foreign_key=True)
+    on_sunday = Column(Boolean)
+    on_monday = Column(Boolean)
+    on_tuesday = Column(Boolean)
+    on_wednesday = Column(Boolean)
+    on_thursday = Column(Boolean)
+    on_friday = Column(Boolean)
+    on_saturday = Column(Boolean)
+    repeat_type = Column(Enum(RepeatTypes), nullable=False)
+    is_deleted = Column(Boolean)
+
+    # patient = relationship("Patient", back_populates="shecule")
+    
+    def __repr__(self):
+        return ""
 
 # class Doctors(Base):
 #     __tablename__ = 'doctors'
