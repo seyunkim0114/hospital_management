@@ -1,14 +1,24 @@
 package com.hospital.hospital.doctor;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+
+@Entity
+@Table(name = "doctor")
 public class Doctor {
-    private Integer doctor_id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long doctor_id;
+
     private String firstname;
     private String lastname;
     
-    public Doctor () {
-    }
+    public Doctor () {}
 
-    public Doctor (Integer doctor_id, String firstname, String lastname) {
+    public Doctor (Long doctor_id, String firstname, String lastname) {
         this.doctor_id = doctor_id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -19,7 +29,7 @@ public class Doctor {
         this.lastname = lastname;
     }
 
-    public Integer getDoctor_id() {
+    public Long getDoctor_id() {
         return doctor_id;
     }
 
@@ -31,7 +41,7 @@ public class Doctor {
         return lastname;
     }
 
-    public void setDoctor_id(Integer doctor_id) {
+    public void setDoctor_id(Long doctor_id) {
         this.doctor_id = doctor_id;
     }
 
