@@ -18,9 +18,14 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @GetMapping
+    @GetMapping("/allpatients")
     public List<Patient> getPatients() {
         return patientService.getPatients();
+    }
+
+    @GetMapping("/patientsft300")
+    public List<Patient> getPatientsGT300() {
+        return patientService.getPatientsGT300();
     }
     
 }

@@ -8,9 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.print.attribute.standard.DateTimeAtCompleted;
+
+import org.hibernate.query.criteria.internal.expression.function.CurrentDateFunction;
 
 @Entity
-@Table(name="patient")
+// @Table(name="patient")
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,12 +22,13 @@ public class Patient {
     private String firstname;
     private String lastname;
     private Date dob;
-    private Boolean discharged;
+    private Date admitted;
+    private Date discharged;
 
     // Default constructor
     public Patient() {}
 
-    public Patient(Integer patient_id, String firstname, String lastname, Date dob, Boolean discharged) {
+    public Patient(Integer patient_id, String firstname, String lastname, Date dob, Date admitted, Date discharged) {
         this.patient_id = patient_id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -32,11 +36,14 @@ public class Patient {
         this.discharged = discharged;
     }
 
-    public Patient (String firstname, String lastname, Date dob) {
+    public Patient (String firstname, String lastname, Date dob, Date admitted, Date discharged) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.dob = dob;
-        this.discharged = false;
+        // this.discharged = null;
+        this.discharged = discharged;
+        // this.admitted = CurrentDateFunction
+        this.admitted = admitted;
     }
 
     public Integer getPatient_id() {
@@ -71,13 +78,22 @@ public class Patient {
         this.dob = dob;
     }
 
-    public Boolean getDischarged() {
+    public Date getDischarged() {
         return discharged;
     }
 
-    public void setDischarged(Boolean discharged) {
+    public Date getAdmitted() {
+        return admitted;
+    }
+
+    public void setAdmitted(Date admitted) {
+        this.admitted = admitted;
+    }
+
+    public void setDischarged(Date discharged) {
         this.discharged = discharged;
     }
+
 
     @Override
     public String toString() {
@@ -86,6 +102,7 @@ public class Patient {
                 ", firstname=" + firstname + '\'' +
                 ", lastname=" + lastname + '\'' +
                 ", dob=" + dob + '\'' +
+                ", admitted=" + admitted + '\'' +
                 ", discharged=" + discharged + '\'' +
                 "}";
     }

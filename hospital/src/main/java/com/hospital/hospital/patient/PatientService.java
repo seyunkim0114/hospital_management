@@ -18,6 +18,10 @@ public class PatientService {
     public List<Patient> getPatients() {
         return patientRepository.findAll();
     }
+
+    public List<Patient> getPatientsGT300() {
+        return patientRepository.findByIdGT300();
+    }
     
 }
 
