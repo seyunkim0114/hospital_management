@@ -1,5 +1,8 @@
 package com.hospital.hospital.prescription;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +27,14 @@ public class PrescriptionController {
         return prescriptionService.getPrescription();
     }
 
-    @GetMapping("/findAddDateToStartDate")
-    public List<Date> getAddDateToStartDate() {
-        return prescriptionService.getAddDateToStartDate();
-    }
+    // @GetMapping("/findAddDateToStartDate")
+    // public List<Date> getAddDateToStartDate() {
+    //     return prescriptionService.getAddDateToStartDate();
+    // }
+
+    // @GetMapping("/findAllNextDateTimeToPrescribe")
+    // public List<PrescriptionResult> findAllNextDateTimeToPrescribe() {        
+    //     return prescriptionService.findAllNextDateTimeToPrescribe();
+
+    // }
 }

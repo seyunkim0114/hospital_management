@@ -12,13 +12,13 @@ function createData(patient_id, firstname, lastname, DOB, admitted) {
   return { patient_id, firstname, lastname, DOB, admitted };
 }
 
-export default function DenseTable() {
+export default function YourPatients() {
 
   const[patients, setPatients] = useState([]);
   const rows= [];
 
   useEffect(()=>{
-    fetch("http://localhost:8080/patient/patient_id/bynurseid")
+    fetch("http://localhost:5050/patients")
     .then(res=>res.json())
     .then((result)=>{
       setPatients(result);

@@ -1,5 +1,6 @@
 package com.hospital.hospital.prescription;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,10 +22,16 @@ public class PrescriptionService {
     }
 
     public List<Prescription> getPrescription() {
-        return prescriptionRepository.findAll();
+        List<Prescription> prescriptions = new ArrayList<Prescription>();
+        prescriptionRepository.findAll().forEach(prescription -> prescriptions.add(prescription));
+        return prescriptions;
     }
 
-    public List<Date> getAddDateToStartDate() {
-        return prescriptionRepository.findAddDateToStartDate();
-    }
+    // public List<Date> getAddDateToStartDate() {
+    //     return prescriptionRepository.findAddDateToStartDate();
+    // }
+
+    // public List<PrescriptionResult> findAllNextDateTimeToPrescribe() {
+    //     return prescriptionRepository.findAllNextDateTimeToPrescribe();
+    // }
 }

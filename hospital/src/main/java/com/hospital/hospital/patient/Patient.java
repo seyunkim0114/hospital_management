@@ -22,29 +22,24 @@ public class Patient {
     private String firstname;
     private String lastname;
     private Date dob;
-    private Date admitted;
-    private Date discharged;
+    // private Date admitted;
+    // private Date discharged;
 
     // Default constructor
     public Patient() {}
 
-    public Patient(Integer patient_id, String firstname, String lastname, Date dob, Date admitted, Date discharged) {
+    public Patient(Integer patient_id, String firstname, String lastname, Date dob) {
         this.patient_id = patient_id;
         this.firstname = firstname;
         this.lastname = lastname;
         this.dob = dob;
-        this.discharged = discharged;
     }
 
-    public Patient (String firstname, String lastname, Date dob, Date admitted, Date discharged) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.dob = dob;
-        // this.discharged = null;
-        this.discharged = discharged;
-        // this.admitted = CurrentDateFunction
-        this.admitted = admitted;
-    }
+    // public Patient (String firstname, String lastname, Date dob) {
+    //     this.firstname = firstname;
+    //     this.lastname = lastname;
+    //     this.dob = dob;
+    // }
 
     public Integer getPatient_id() {
         return patient_id;
@@ -78,23 +73,6 @@ public class Patient {
         this.dob = dob;
     }
 
-    public Date getDischarged() {
-        return discharged;
-    }
-
-    public Date getAdmitted() {
-        return admitted;
-    }
-
-    public void setAdmitted(Date admitted) {
-        this.admitted = admitted;
-    }
-
-    public void setDischarged(Date discharged) {
-        this.discharged = discharged;
-    }
-
-
     @Override
     public String toString() {
         return "Patient{" +
@@ -102,8 +80,6 @@ public class Patient {
                 ", firstname=" + firstname + '\'' +
                 ", lastname=" + lastname + '\'' +
                 ", dob=" + dob + '\'' +
-                ", admitted=" + admitted + '\'' +
-                ", discharged=" + discharged + '\'' +
                 "}";
     }
 

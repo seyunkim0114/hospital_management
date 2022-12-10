@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import pymysql
+from flask_cors import CORS
 
 from .routes import main
 from .extensions import db
@@ -17,7 +18,7 @@ def create_app(test_config=None):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:iampw@localhost:3306/temphospital'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
+    CORS(app)
     db.init_app(app)
 
     app.register_blueprint(main)

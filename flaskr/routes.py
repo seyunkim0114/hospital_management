@@ -61,7 +61,7 @@ def getNurseById(id):
     # return jsonify(query)
     return query_json
 
-@main.route("/nurses_responsible", methods=["GET"])
+@main.route("/nurses_responsible", methods=["GET", "POST"])
 def getNursesResponsibleForPrescriptionNow():
     now = datetime.now()
 
@@ -78,8 +78,8 @@ def getNursesResponsibleForPrescriptionNow():
     for q in query:
         query_json.append({
             "patient_id": str(q[0]),
-            "patient_lastname": str(q[1]),
-            "patient_firstname": str(q[2]),
+            "lastname": str(q[1]),
+            "firstname": str(q[2]),
             "clinician_id": str(q[3]),
             "prescription_id": str(q[4]),
             "room_id": str(q[5]),
