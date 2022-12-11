@@ -19,14 +19,7 @@ function App() {
         </Routes>
       </Router>
     </>
-    // <div className="App">
-    //   <Appbar/>
-    //   {/* Upcoming Prescriptions
-    //   <UpcomingPrescriptions/> */}
-    //   Your Patients
-    //   <PatientsToPrescribe/>
 
-    // </div>
   );
 }
 

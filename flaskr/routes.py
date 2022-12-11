@@ -1,5 +1,6 @@
 from flask import Flask, request, session, redirect, url_for, render_template, flash, jsonify
 from flask import Blueprint
+from sqlalchemy import func, text, or_
 from datetime import datetime
 # from flask_marshamllow import Marshmallow
 
@@ -61,30 +62,65 @@ def getNurseById(id):
     # return jsonify(query)
     return query_json
 
-@main.route("/nurses_responsible", methods=["GET", "POST"])
+@main.route("/nurses_responsible", methods=["GET"])
 def getNursesResponsibleForPrescriptionNow():
     now = datetime.now()
+    """
+    diff_date = now - state_date
+    diff_hour = diff_date.total_seconds / 3600
 
-    query = session.query(Patient.patient_id, Patient.lastname, Patient.firstname, Nurse.clinician_id, \
-        Prescription.prescription_id, Room.room_id,  Room.room_type). \
-            filter(Prescription.patient_id == Patient.patient_id) \
+    if diff_hour % med_interval < 1
+
+ 
+    """
+    ontimes =  session.query(Prescription.prescription_id, Prescription.start_date) \
+        .filter(Prescription.med_interval - func.time_to_sec(func.timediff(now, Prescription.start_date))/3600 % Prescription.med_interval < 10).subquery("ontimes")
+    # query_json = []
+    # for q in query:
+    #     query_json.append({
+    #         'prescription_id': str(q[0]),
+    #         'hour_diff': str(q[1])
+    #     })
+
+    # query = session.query(Patient.patient_id, Patient.lastname, Patient.firstname, Nurse.clinician_id, \
+    #     Prescription.prescription_id, Room.room_id,  Room.room_type) \
+    #         .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
+    #         .filter(Prescription.patient_id == Patient.patient_id) \
+    #             .filter(Patient.room_id == Room.room_id) \
+    #                 .filter(Room.room_id == responsible.c.room_id) \
+    #                     .filter(responsible.c.clinician_id == Nurse.clinician_id) \
+    #                         .filter(Nurse.startshift > now) \
+    #                             .filter(Nurse.endshift < now).all()
+    
+    query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id) \
+        .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
+            .filter(Prescription.patient_id == Patient.patient_id) \
                 .filter(Patient.room_id == Room.room_id) \
                     .filter(Room.room_id == responsible.c.room_id) \
                         .filter(responsible.c.clinician_id == Nurse.clinician_id) \
-                            .filter(Nurse.startshift < now) \
-                                .filter(Nurse.endshift > now).all()
-        
+                            .filter(or_(now > Nurse.startshift, now < Nurse.endshift)).all()
+                                # .filter(Nurse.endshift < now).all()
+
     query_json = []
     for q in query:
         query_json.append({
-            "patient_id": str(q[0]),
-            "lastname": str(q[1]),
-            "firstname": str(q[2]),
-            "clinician_id": str(q[3]),
-            "prescription_id": str(q[4]),
-            "room_id": str(q[5]),
-            "room_type": str(q[6])
+            "prescription_id": str(q[0]),
+            "patient_id": str(q[1]),
+            "room_id": str(q[2]),
+            "clinician_id": str(q[3])
         })
+
+    # query_json = []
+    # for q in query:
+    #     query_json.append({
+    #         "patient_id": str(q[0]),
+    #         "lastname": str(q[1]),
+    #         "firstname": str(q[2]),
+    #         "clinician_id": str(q[3]),
+    #         "prescription_id": str(q[4]),
+    #         "room_id": str(q[5]),
+    #         "room_type": str(q[6])
+    #     })
     
     return query_json
 

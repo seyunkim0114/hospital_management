@@ -13,3 +13,10 @@ where n.clinician_id = r.clinician_id and
         s.patient_id = p.patient_id and 
         n.clinician_id = @clinician_id
 order by n.clinician_id;
+
+select * from prescription;
+
+select p.end_date, p.end_date / p.med_interval as raw, sec_to_time(p.end_date / p.med_interval) as neww
+from prescription p;
+
+create 

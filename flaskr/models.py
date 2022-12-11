@@ -13,18 +13,18 @@ class Prescription(db.Model):
     prescription_id: int
     medicine_name: str
     patient_id: int
-    # med_interval: int
-    # start_date: datetime.datetime
-    # end_date: datetime.datetime
+    med_interval: int
+    start_date: datetime.datetime
+    end_date: datetime.datetime
     # is_deleted: bool
     # special_notes: str
 
     prescription_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     medicine_name = db.Column(db.String(20), nullable=False) 
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'))
-    # med_interval = db.Column(db.Integer)
-    # start_date = db.Column(db.DATETIME)
-    # end_date = db.Column(db.DATETIME)
+    med_interval = db.Column(db.Integer)
+    start_date = db.Column(db.DATETIME)
+    end_date = db.Column(db.DATETIME)
     # is_deleted = db.Column(db.Boolean)
     # special_notes = db.Column(db.String(300))
     patientsRel = db.relationship('Patient', backref='patient')
