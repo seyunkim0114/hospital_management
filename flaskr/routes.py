@@ -1,6 +1,6 @@
 from flask import Flask, request, session, redirect, url_for, render_template, flash, jsonify
 from flask import Blueprint
-from sqlalchemy import func, text, or_
+from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime
 # from flask_marshamllow import Marshmallow
 
@@ -65,6 +65,7 @@ def getNurseById(id):
 @main.route("/nurses_responsible", methods=["GET"])
 def getNursesResponsibleForPrescriptionNow():
     now = datetime.now()
+    time_now = now.time()
     """
     diff_date = now - state_date
     diff_hour = diff_date.total_seconds / 3600
@@ -98,8 +99,9 @@ def getNursesResponsibleForPrescriptionNow():
                 .filter(Patient.room_id == Room.room_id) \
                     .filter(Room.room_id == responsible.c.room_id) \
                         .filter(responsible.c.clinician_id == Nurse.clinician_id) \
-                            .filter(or_(now > Nurse.startshift, now < Nurse.endshift)).all()
-                                # .filter(Nurse.endshift < now).all()
+                            .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
+                                and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
+                                    Nurse.startshift > Nurse.endshift) )).all()
 
     query_json = []
     for q in query:
