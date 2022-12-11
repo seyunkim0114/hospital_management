@@ -8,8 +8,8 @@ function createData(patient_id, lastname, firstname, room_id, prescription_id, c
 
 const columns = [
   { field: 'patient_id', headerName: 'Patient ID', width: 100 },
-  { field: 'lastName', headerName: 'Last name', width: 130 },
-  { field: 'firstName', headerName: 'First name', width: 130 },
+  { field: 'lastname', headerName: 'Last Name', width: 100 },
+  { field: 'firstname', headerName: 'First Name', width: 100 },
   { field: 'room_id', headerName: 'Room', type: 'number', width: 90 },
   {
     field: 'prescription_id',
@@ -22,20 +22,10 @@ const columns = [
     //   `${params.row.firstName || ''} ${params.row.lastName || ''}`,
   },
   { field: 'clinician_id', headerName: "Clinician ID", width: 90, type: "number"},
-  { field: 'room_type', headerName: "Ward", width: 100 }
+  { field: 'room_type', headerName: "Ward", width: 100, 
+    valueGetter: (param) => param.row.room_type.substring(param.row.room_type.indexOf('.')+1)  }
 ];
 
-// const rows = [
-//   { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-//   { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-//   { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-//   { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-//   { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-//   { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-//   { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-//   { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-//   { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-// ];
 
 export default function PatientsToPrescribe() {
     const[patients, setPatients] = useState([]);
@@ -50,11 +40,15 @@ export default function PatientsToPrescribe() {
     }, [])
 
     console.log(patients)
-    patients.map(patient=>(
+    patients.map(patient=>{
+        if(patient.clinician_id == 101){
+            rows.push(createData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
+                patient.prescription_id, patient.clinician_id, patient.room_type ))
+        }
         // rows.push(patient)
-        rows.push(createData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
-            patient.prescription_id, patient.clinician_id, patient.room_type ))
-    ))
+        console.log(rows)
+        
+    })
     
     
 
@@ -65,7 +59,7 @@ export default function PatientsToPrescribe() {
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
-        getRowId={(rows)=>rows.clinician_id}
+        getRowId={(rows)=>rows.prescription_id}
         checkboxSelection
       />
     </div>
