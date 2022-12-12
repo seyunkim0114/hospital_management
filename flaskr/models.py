@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from dataclasses import dataclass
-from datetime import time
 
+from dataclasses import dataclass
+from datetime import time, datetime as dt
 import datetime
 import enum
 
@@ -54,7 +54,7 @@ class Patient(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey("room.room_id"))
     # lastname = db.Column(db.String, nullable=False)
 
-    # prescribedRel = db.relationship('Prescription', backref="patientsRel")
+    staysinRel = db.relationship('StaysIn', backref="patient")
 
 # Define Room.room_type check constraint with Enum
 class RoomTypes(enum.Enum):
@@ -70,7 +70,16 @@ class Room(db.Model):
     room_id = db.Column(db.Integer, primary_key=True)
     room_type = db.Column(db.Enum(RoomTypes))
 
-    patients = db.relationship('Patient', backref='room')
+    patients = db.relationship('StaysIn', backref='room')
+
+@dataclass
+class StaysIn(db.Model):
+    room_id = db.Column(db.Integer, db.ForeignKey('room.room_id'), primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'), primary_key=True)
+    admitted = db.Column(db.DATETIME, nullable=False, default=dt.now()) 
+    discharged = db.Column(db.DATETIME, nullable=True) # default NULL
+
+
 
 # Define Nurse.NursePositions check constraint with Enum
 class NursePositions(enum.Enum):

@@ -2,15 +2,31 @@ from flask import Flask, request, session, redirect, url_for, render_template, f
 from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime
-# from flask_marshamllow import Marshmallow
+import sys
+import logging
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
-from .models import Prescription, Patient, Room, responsible, Nurse
+from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn
 from .extensions import db
 
-
+scheduler = BackgroundScheduler()
 main = Blueprint("main", __name__)
 # use session.query not model.query to make it serializable
 session = db.session
+
+# cron_time = '0 * * * *'
+# cron_time = "* * * * *"
+# tests = []
+# @scheduler.scheduled_job(CronTrigger.from_crontab(cron_time), id='test')
+# @scheduler.scheduled_job(trigger = 'cron', minute = '*')
+# @main.route("/test", methods=["GET"])
+# def test():
+#     print(datetime.now())
+#     return {
+#         "now": datetime.now()
+#     }
+#     print("---------------------------------test", file=sys.stderr)
 
 # Get prescription of prescription_id id
 @main.route("/prescription_<int:id>", methods=["GET"])
@@ -63,6 +79,7 @@ def getNurseById(id):
     return query_json
 
 @main.route("/nurses_responsible", methods=["GET"])
+# @scheduler.scheduled_job(trigger = 'cron', minute = '*', args=[id])
 def getNursesResponsibleForPrescriptionNow():
     now = datetime.now()
     time_now = now.time()
@@ -93,24 +110,31 @@ def getNursesResponsibleForPrescriptionNow():
     #                         .filter(Nurse.startshift > now) \
     #                             .filter(Nurse.endshift < now).all()
     
-    query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id) \
+    query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id, \
+        Patient.lastname, Patient.firstname, Room.room_type) \
         .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
             .filter(Prescription.patient_id == Patient.patient_id) \
-                .filter(Patient.room_id == Room.room_id) \
-                    .filter(Room.room_id == responsible.c.room_id) \
-                        .filter(responsible.c.clinician_id == Nurse.clinician_id) \
-                            .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
-                                and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
-                                    Nurse.startshift > Nurse.endshift) )).all()
+                .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
+                    .filter(StaysIn.room_id == Room.room_id) \
+                        .filter(Room.room_id == responsible.c.room_id) \
+                            .filter(responsible.c.clinician_id == Nurse.clinician_id) \
+                                    .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
+                                        and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
+                                            Nurse.startshift > Nurse.endshift) )).all()
 
     query_json = []
     for q in query:
         query_json.append({
             "prescription_id": str(q[0]),
+            "lastname": str(q[4]),
+            "firstname": str(q[5]),
             "patient_id": str(q[1]),
             "room_id": str(q[2]),
-            "clinician_id": str(q[3])
+            "clinician_id": str(q[3]),
+            "room_type": str(q[6])
         })
+
+    # print(f'Query result on {datetime.now()}: \n{query_json}')
 
     # query_json = []
     # for q in query:
@@ -131,8 +155,8 @@ def getNursesResponsibleForPrescriptionNow():
 
 
 
-
-
 @main.route("/hi")
 def home():
     return "helo"
+
+

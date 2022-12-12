@@ -1,12 +1,19 @@
 import os
+import logging
+import atexit
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import pymysql
 from flask_cors import CORS
 
-from .routes import main
+
+
+from .routes import main, scheduler
 from .extensions import db
+
+# from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.triggers.cron import CronTrigger
 
 def create_app(test_config=None):
     # create and configure the app
@@ -23,6 +30,11 @@ def create_app(test_config=None):
 
     app.register_blueprint(main)
     
+    # scheduler = BackgroundScheduler()
+    scheduler.start()
+    # app.logger.info(test())
+    atexit.register(lambda: scheduler.shutdown())  
+
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
