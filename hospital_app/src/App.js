@@ -14,7 +14,7 @@ function App() {
       <Router>
         <Appbar/>
         <Routes>
-          <Route path="/101" element={<PatientsToPrescribe/>} />
+          <Route path="/106" element={<PatientsToPrescribe/>} />
           {/* <Redirect to="/" /> */}
         </Routes>
       </Router>

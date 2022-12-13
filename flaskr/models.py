@@ -117,6 +117,11 @@ class Nurse(db.Model):
 
 @dataclass
 class Completed(db.Model):
+    clinician_id: int
+    patient_id: int
+    prescription_id: int
+    completed_at: datetime
+    
     clinician_id = db.Column(db.Integer, db.ForeignKey('nurse.clinician_id'), primary_key = True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'), primary_key=True)
     prescription_id = db.Column(db.Integer, db.ForeignKey('prescription.prescription_id'), primary_key=True)

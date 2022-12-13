@@ -164,6 +164,24 @@ def getNursesResponsibleForPrescriptionNow():
     
     return query_json
 
+@main.route("/completions", methods=["GET"])
+def get_completions():
+    # query = session.query(Completed).all()
+    query = session.query(Completed.patient_id, Patient.lastname, Patient.firstname, Completed.prescription_id, \
+        Completed.completed_at).\
+            filter(Completed.patient_id == Patient.patient_id)
+    
+    query_json = []
+    for q in query:
+        query_json.append({
+            "patient_id": str(q[0]),
+            "lastname": str(q[1]),
+            "firstname": str(q[2]),
+            "prescription_id": str(q[3]),
+            "completed_at": str(q[4])
+        })
+        
+    return query_json
 
 @main.route("/addlogs", methods=["POST"])
 def add_logs():
