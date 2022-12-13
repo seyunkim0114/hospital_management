@@ -27,8 +27,9 @@ class Prescription(db.Model):
     end_date = db.Column(db.DATETIME)
     # is_deleted = db.Column(db.Boolean)
     # special_notes = db.Column(db.String(300))
-    patientsRel = db.relationship('Patient', backref='patient')
 
+    patientsRel = db.relationship('Patient', backref='patient')
+    completed_prescriptions = db.relationship('Completed', backref='prescription')
 
 # @dataclass
 # class Prescribed(db.Model):
@@ -55,6 +56,7 @@ class Patient(db.Model):
     # lastname = db.Column(db.String, nullable=False)
 
     staysinRel = db.relationship('StaysIn', backref="patient")
+    completed_patients = db.relationship('Completed', backref='patient')
 
 # Define Room.room_type check constraint with Enum
 class RoomTypes(enum.Enum):
@@ -111,6 +113,24 @@ class Nurse(db.Model):
     endshift = db.Column(db.Time)
 
     rooms = db.relationship('Room', secondary=responsible, backref='nurse')
+    completed_nurses = db.relationship('Completed', backref='nurse')
+
+@dataclass
+class Completed(db.Model):
+    clinician_id = db.Column(db.Integer, db.ForeignKey('nurse.clinician_id'), primary_key = True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'), primary_key=True)
+    prescription_id = db.Column(db.Integer, db.ForeignKey('prescription.prescription_id'), primary_key=True)
+    completed_at = db.Column(db.DATETIME, nullable=False, default=dt.now())
+    
+
+
+
+
+
+
+
+
+
 
 
 # class Responsible(db.Model):

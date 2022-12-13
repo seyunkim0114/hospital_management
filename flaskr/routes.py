@@ -2,12 +2,13 @@ from flask import Flask, request, session, redirect, url_for, render_template, f
 from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime
+
 import sys
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn
+from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed
 from .extensions import db
 
 scheduler = BackgroundScheduler()
@@ -82,7 +83,9 @@ def getNurseById(id):
 # @scheduler.scheduled_job(trigger = 'cron', minute = '*', args=[id])
 def getNursesResponsibleForPrescriptionNow():
     now = datetime.now()
-    time_now = now.time()
+    # time_now = now.strftime("%H:%M:%S")
+    # time_now = now.time()
+    time_now = datetime(2022,12,1,9,21,0,0)
     """
     diff_date = now - state_date
     diff_hour = diff_date.total_seconds / 3600
@@ -122,6 +125,17 @@ def getNursesResponsibleForPrescriptionNow():
                                         and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
                                             Nurse.startshift > Nurse.endshift) )).all()
 
+    # query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id, \
+    # Patient.lastname, Patient.firstname, Room.room_type) \
+    # .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
+    #     .filter(Prescription.patient_id == Patient.patient_id) \
+    #         .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
+    #             .filter(StaysIn.room_id == Room.room_id) \
+    #                 .filter(Room.room_id == responsible.c.room_id) \
+    #                     .filter(responsible.c.clinician_id == Nurse.clinician_id) \
+    #                             .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
+    #                                     Nurse.startshift > Nurse.endshift) ).all()
+
     query_json = []
     for q in query:
         query_json.append({
@@ -151,6 +165,38 @@ def getNursesResponsibleForPrescriptionNow():
     return query_json
 
 
+@main.route("/addlogs", methods=["POST"])
+def add_logs():
+    """
+    patient_id
+    clinician_id
+    prescription id
+    completed time: now()
+    recommendation ?
+    special notes ?
+    """
+    patient_id = request.json[0]['patient_id']
+    clinician_id = request.json[0]['clinician_id']
+    prescription_id = request.json[0]['prescription_id']
+    # completed_at = {"completed_at": datetime.now()}
+    completed_at = datetime.now()
+
+    completion = Completed(
+        patient_id = patient_id,
+        clinician_id = clinician_id,
+        prescription_id = prescription_id,
+        completed_at = completed_at
+    )
+    
+    session.add(completion)
+    session.commit()
+
+    return {
+        "patient_id": patient_id,
+        "clinician_id": clinician_id,
+        "prescription_id": prescription_id,
+        "completed_at": completed_at
+    }
 
 
 
