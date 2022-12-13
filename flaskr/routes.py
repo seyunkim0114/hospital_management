@@ -1,7 +1,7 @@
 from flask import Flask, request, session, redirect, url_for, render_template, flash, jsonify
 from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import sys
 import logging
@@ -14,7 +14,7 @@ from .extensions import db
 scheduler = BackgroundScheduler()
 main = Blueprint("main", __name__)
 # use session.query not model.query to make it serializable
-session = db.session
+# session = db.session
 
 # cron_time = '0 * * * *'
 # cron_time = "* * * * *"
@@ -32,6 +32,7 @@ session = db.session
 # Get prescription of prescription_id id
 @main.route("/prescription_<int:id>", methods=["GET"])
 def get_prescriptions(id):
+    session = db.session
     query = session.query(Prescription.prescription_id, Prescription.medicine_name) \
         .filter(Prescription.prescription_id == id).all()
 
@@ -48,6 +49,7 @@ def get_prescriptions(id):
 # Get patient id, medicine name for patients who have prescriptions
 @main.route("/patients", methods=["GET"])
 def getPatientsAndPrescriptions():
+    session = db.session
     query = session.query(Patient.patient_id, Prescription.prescription_id, Prescription.medicine_name). \
         filter(Prescription.patient_id == Patient.patient_id).all()
     query_json = []
@@ -63,6 +65,7 @@ def getPatientsAndPrescriptions():
 # Get information of nurse with clinician_id id
 @main.route("/nurse_<int:id>", methods=["GET"])
 def getNurseById(id):
+    session = db.session
     query = session.query(Nurse.clinician_id, Nurse.lastname, Nurse.firstname, Nurse.position) \
         .filter(Nurse.clinician_id == id).all()
 
@@ -82,10 +85,11 @@ def getNurseById(id):
 @main.route("/nurses_responsible", methods=["GET"])
 # @scheduler.scheduled_job(trigger = 'cron', minute = '*', args=[id])
 def getNursesResponsibleForPrescriptionNow():
+    session = db.session
     now = datetime.now()
     # time_now = now.strftime("%H:%M:%S")
-    # time_now = now.time()
-    time_now = datetime(2022,12,1,9,21,0,0)
+    time_now = now.time()
+    # time_now = datetime(2022,12,1,9,21,0,0)
     """
     diff_date = now - state_date
     diff_hour = diff_date.total_seconds / 3600
@@ -164,42 +168,63 @@ def getNursesResponsibleForPrescriptionNow():
     
     return query_json
 
-@main.route("/completions", methods=["GET"])
+@main.route("/completions", methods=["GET", "POST"])
 def get_completions():
-    # query = session.query(Completed).all()
-    query = session.query(Completed.patient_id, Patient.lastname, Patient.firstname, Completed.prescription_id, \
+    """
+    Returns the prescribed log of the last 30 days from now  
+    Return JSON
+        completion_id
+        patient_id
+        lastname
+        firstname
+        prescription_id
+        completed_at
+    """
+    session = db.session
+
+    now = datetime.now()
+    # time_now = now.strftime("%H:%M:%S")
+
+    # query = session.query(Completed.completion_id).all()
+    query = session.query(Completed.completion_id, Completed.patient_id, Patient.lastname, Patient.firstname, Completed.prescription_id, \
         Completed.completed_at).\
-            filter(Completed.patient_id == Patient.patient_id)
+            filter(Completed.patient_id == Patient.patient_id) \
+                .filter(Completed.completed_at > now - timedelta(days=30))
     
     query_json = []
     for q in query:
         query_json.append({
-            "patient_id": str(q[0]),
-            "lastname": str(q[1]),
-            "firstname": str(q[2]),
-            "prescription_id": str(q[3]),
-            "completed_at": str(q[4])
+            "completion_id": str(q[0]),
+            "patient_id": str(q[1]),
+            "lastname": str(q[2]),
+            "firstname": str(q[3]),
+            "prescription_id": str(q[4]),
+            "completed_at": str(q[5])
         })
-        
+
     return query_json
+
 
 @main.route("/addlogs", methods=["POST"])
 def add_logs():
     """
-    patient_id
-    clinician_id
-    prescription id
-    completed time: now()
-    recommendation ?
-    special notes ?
+    Retrieves:
+        patient_id
+        clinician_id
+        prescription_id
+        completed_at
     """
+    session = db.session
+
     patient_id = request.json[0]['patient_id']
+    # completion_id = request.json[0]["completion_id"]
     clinician_id = request.json[0]['clinician_id']
     prescription_id = request.json[0]['prescription_id']
     # completed_at = {"completed_at": datetime.now()}
     completed_at = datetime.now()
 
     completion = Completed(
+        # completion_id = completion_id
         patient_id = patient_id,
         clinician_id = clinician_id,
         prescription_id = prescription_id,

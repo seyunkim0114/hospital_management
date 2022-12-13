@@ -121,7 +121,9 @@ class Completed(db.Model):
     patient_id: int
     prescription_id: int
     completed_at: datetime
-    
+    completion_id: int
+
+    completion_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     clinician_id = db.Column(db.Integer, db.ForeignKey('nurse.clinician_id'), primary_key = True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'), primary_key=True)
     prescription_id = db.Column(db.Integer, db.ForeignKey('prescription.prescription_id'), primary_key=True)

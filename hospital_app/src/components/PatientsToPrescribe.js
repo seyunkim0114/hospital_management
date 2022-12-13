@@ -9,9 +9,9 @@ function createPrescriptionData(patient_id, lastname, firstname, room_id, prescr
 }
 
 
-function createCompletionData(patient_id, lastname, firstname, prescription_id, completed_at) {
-    return { patient_id, lastname, firstname, prescription_id, completed_at };
-}
+// function createCompletionData(completion_id, patient_id, lastname, firstname, prescription_id, completed_at) {
+//     return { completion_id, patient_id, lastname, firstname, prescription_id, completed_at };
+// }
 
 const columns = [
   { field: 'patient_id', headerName: 'Patient ID', width: 100 },
@@ -34,7 +34,7 @@ const columns = [
 ];
 
 function handleCheckboxSelect(data) {
-    console.log(JSON.stringify(data))
+    // console.log(JSON.stringify(data))
     // e.preventDefault();
     fetch('http://localhost:5000/addlogs', {
             'method':'POST',
@@ -51,8 +51,8 @@ function handleCheckboxSelect(data) {
 export default function PatientsToPrescribe() {
     const[patients, setPatients] = useState([]);
     const rows = [];
-    const[completions, setCompletions] = useState([]);
-    const comps = [];
+    // const[completions, setCompletions] = useState([]);
+    // const comps = [];
     // handleCheckboxSelect = (event) => {
     //     console.log("selected")
     // };
@@ -65,15 +65,16 @@ export default function PatientsToPrescribe() {
         })
     }, [])
 
-    useEffect(()=>{
-        fetch("http://127.0.0.1:5000/completions")
-        .then(res=>res.json())
-        .then((result)=>{
-            setCompletions(result)
-        })
-    }, [])
+    // useEffect(()=>{
+    //     fetch("http://127.0.0.1:5000/completions")
+    //     .then(res=>res.json())
+    //     .then((result)=>{
+    //         setCompletions(result)
+    //         console.log(result)
+    //     })
+    // }, [])
 
-    console.log(patients)
+    // console.log(patients)
     patients.map(patient=>{
         if(patient.clinician_id == 106){
             rows.push(createPrescriptionData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
@@ -84,10 +85,10 @@ export default function PatientsToPrescribe() {
         
     })
     
-    completions.map(completion=>{
-        comps.push(createCompletionData(completion.patient_id, completion.lastname, 
-            completion.firstname, completion.prescription_id, completion.completed_at))
-    })
+    // completions.map(completion=>{
+    //     comps.push(createCompletionData(completion.completion_id, completion.patient_id, completion.lastname, 
+    //         completion.firstname, completion.prescription_id, completion.completed_at))
+    // })
     
 
   return (
@@ -111,7 +112,7 @@ export default function PatientsToPrescribe() {
       />
 
       Your prescribed log
-      <CompletionLog c={comps}/>
+      <CompletionLog/>
     </div>
   );
 }
