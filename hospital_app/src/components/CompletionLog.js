@@ -27,7 +27,7 @@ export default function CompletionLog() {
         .then(res=>res.json())
         .then((result)=>{
             setCompletions(result)
-            console.log(result)
+            // console.log(result)
         })
     }, [])
 

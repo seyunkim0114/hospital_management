@@ -1,17 +1,14 @@
 import { useSlotProps } from '@mui/base';
+import { Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import React, { useEffect, useState } from 'react';
 import CompletionLog from './CompletionLog';
 // import APIService from '../Components/APIService'
 
+
 function createPrescriptionData(patient_id, lastname, firstname, room_id, prescription_id, clinician_id, room_type) {
     return { patient_id, lastname, firstname, room_id, prescription_id, clinician_id, room_type };
 }
-
-
-// function createCompletionData(completion_id, patient_id, lastname, firstname, prescription_id, completed_at) {
-//     return { completion_id, patient_id, lastname, firstname, prescription_id, completed_at };
-// }
 
 const columns = [
   { field: 'patient_id', headerName: 'Patient ID', width: 100 },
@@ -33,6 +30,7 @@ const columns = [
     valueGetter: (param) => param.row.room_type.substring(param.row.room_type.indexOf('.')+1)  }
 ];
 
+
 function handleCheckboxSelect(data) {
     // console.log(JSON.stringify(data))
     // e.preventDefault();
@@ -50,12 +48,11 @@ function handleCheckboxSelect(data) {
 
 export default function PatientsToPrescribe() {
     const[patients, setPatients] = useState([]);
+    // const[rows, setRows] = useState([])
+    const[deletedRows, setDeletedRows] = useState([]);
+    const[selectionModel, setSelectionModel] = useState([]);
+    
     const rows = [];
-    // const[completions, setCompletions] = useState([]);
-    // const comps = [];
-    // handleCheckboxSelect = (event) => {
-    //     console.log("selected")
-    // };
     
     useEffect(()=>{
         fetch("http://127.0.0.1:5000/nurses_responsible")
@@ -65,51 +62,61 @@ export default function PatientsToPrescribe() {
         })
     }, [])
 
-    // useEffect(()=>{
-    //     fetch("http://127.0.0.1:5000/completions")
-    //     .then(res=>res.json())
-    //     .then((result)=>{
-    //         setCompletions(result)
-    //         console.log(result)
-    //     })
-    // }, [])
-
     // console.log(patients)
     patients.map(patient=>{
         if(patient.clinician_id == 106){
             rows.push(createPrescriptionData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
                 patient.prescription_id, patient.clinician_id, patient.room_type ))
         }
-        // rows.push(patient)
-        // console.log(rows)
-        
     })
     
-    // completions.map(completion=>{
-    //     comps.push(createCompletionData(completion.completion_id, completion.patient_id, completion.lastname, 
-    //         completion.firstname, completion.prescription_id, completion.completed_at))
-    // })
+
+    const handleRowSelection = (e) => {
+        console.log(e)
+        setDeletedRows([...deletedRows, ...rows.filter(
+            (r) => r.prescription_id === e.data.prescription_id
+        )])
+    }
+
+    const deleteSelectedRow = (e) => {
+        setPatients(
+            rows.filter(
+                (r) => deletedRows.filter(
+                    (sr) => sr.prescription_id === r.prescription_id).length < 1)
+            );
+    };
     
 
   return (
     <div style={{ height: 400, width: '100%' }}>
         Upcoming Prescriptions
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        getRowId={(rows)=>rows.prescription_id}
-        checkboxSelection
-        onSelectionModelChange={(ids) => {
-            const selectedIDs = new Set(ids);
-            const selectedRowData = rows.filter((row) => 
-                selectedIDs.has(row.prescription_id.toString())
-            );
-            handleCheckboxSelect(selectedRowData);
-        console.log(selectedRowData);
-        }}
-      />
+        <div style={{ display: "flex", justifyContent: 'flex-end'}}>
+            <button 
+                style={{ width: "100px", height: "30px",}}
+                onClick={deleteSelectedRow} >
+                DONE
+            </button>
+        </div>
+            
+        <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5]}
+            getRowId={(rows)=>rows.prescription_id}
+            allowDelete={true}
+            checkboxSelection
+            onSelectionModelChange={(ids) => {
+                const selectedIDs = new Set(ids);
+                const selectedRowData = rows.filter((row) => 
+                    selectedIDs.has(row.prescription_id.toString())
+                );
+                handleCheckboxSelect(selectedRowData);
+                // console.log(selectedRowData);                
+            }}
+            onRowSelected={handleRowSelection}
+        />
+      
 
       Your prescribed log
       <CompletionLog/>
