@@ -6,27 +6,32 @@ import CompletionLog from './CompletionLog';
 // import APIService from '../Components/APIService'
 
 
-function createPrescriptionData(patient_id, lastname, firstname, room_id, prescription_id, clinician_id, room_type) {
-    return { patient_id, lastname, firstname, room_id, prescription_id, clinician_id, room_type };
+function createPrescriptionData(patient_id, lastname, firstname, room_id, prescription_id, 
+    medicine_name, recommendation, special_notes, clinician_id, room_type) {
+    return { patient_id, lastname, firstname, room_id, prescription_id, 
+        medicine_name, recommendation, special_notes, clinician_id, room_type };
 }
 
 const columns = [
-  { field: 'patient_id', headerName: 'Patient ID', width: 100 },
-  { field: 'lastname', headerName: 'Last Name', width: 100 },
-  { field: 'firstname', headerName: 'First Name', width: 100 },
-  { field: 'room_id', headerName: 'Room', type: 'number', width: 90 },
+  { field: 'patient_id', headerName: 'Patient ID', width: 150 },
+  { field: 'lastname', headerName: 'Last Name', width: 150 },
+  { field: 'firstname', headerName: 'First Name', width: 150 },
   {
     field: 'prescription_id',
     headerName: 'Prescription ID',
     // description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 90,
+    width: 150,
     type: 'number'
     // valueGetter: (params) =>
     //   `${params.row.firstName || ''} ${params.row.lastName || ''}`,
   },
-  { field: 'clinician_id', headerName: "Clinician ID", width: 90, type: "number"},
-  { field: 'room_type', headerName: "Ward", width: 100, 
+  { field: 'medicine_name', headerName: "Medication", width: 150 },
+  { field: 'recommendation', headerName: "Recommendation", width: 200},
+  { field: 'special_notes', headerName: "Note", width: 200},
+  { field: 'clinician_id', headerName: "Clinician ID", width: 150, type: "number"},
+  { field: 'room_id', headerName: 'Room', type: 'number', width: 150 },
+  { field: 'room_type', headerName: "Ward", width: 150, 
     valueGetter: (param) => param.row.room_type.substring(param.row.room_type.indexOf('.')+1)  }
 ];
 
@@ -66,7 +71,8 @@ export default function PatientsToPrescribe() {
     patients.map(patient=>{
         if(patient.clinician_id == 106){
             rows.push(createPrescriptionData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
-                patient.prescription_id, patient.clinician_id, patient.room_type ))
+                patient.prescription_id, patient.medicine_name, patient.recommendation, 
+                patient.special_notes, patient.clinician_id, patient.room_type ))
         }
     })
     
