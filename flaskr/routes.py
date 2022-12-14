@@ -2,13 +2,13 @@ from flask import Flask, request, session, redirect, url_for, render_template, f
 from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime, timedelta
-# SEyun
+
 import sys
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed
+from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed, Medication, has
 from .extensions import db
 
 scheduler = BackgroundScheduler()
@@ -203,7 +203,26 @@ def add_logs():
     }
 
 
+@main.route("/fullprescriptions", methods=["GET"])
+def get_full_prescriptions():
+    session = db.session
 
+    query = session.query(Prescription.prescription_id, Prescription.patient_id, Medication.medicine_name, \
+        Medication.recommendation, Prescription.special_notes
+        ).filter(Prescription.prescription_id == has.c.prescription_id) \
+            .filter(has.c.medicine_id == Medication.medicine_id).all()
+
+    query_json = []
+    for q in query:
+        query_json.append({
+            "prescription_id": str(q[0]),
+            "patient_id": str(q[1]),
+            "medicine_name": str(q[2]),
+            "recomemndation": str(q[3]),
+            "special_notes": str(q[4])
+        })    
+    
+    return query_json
 
 @main.route("/hi")
 def home():
