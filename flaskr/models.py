@@ -16,7 +16,7 @@ class Prescription(db.Model):
     med_interval: int
     start_date: datetime.datetime
     end_date: datetime.datetime
-    # is_deleted: bool
+    medicine_id: int
     special_notes: str
 
     prescription_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -27,6 +27,7 @@ class Prescription(db.Model):
     end_date = db.Column(db.DATETIME)
     # is_deleted = db.Column(db.Boolean)
     special_notes = db.Column(db.String(300))
+    medicine_id = db.Column(db.Integer, db.ForeignKey('medication.medicine_id'))
 
     patientsRel = db.relationship('Patient', backref='patient')
     completed_prescriptions = db.relationship('Completed', backref='prescription')
@@ -49,16 +50,17 @@ class Medication(db.Model):
     medicine_name: str
     recommendation: str
 
-    medicine_id = db.Column(db.Integer, db.ForeignKey('prescription.prescription_id'), \
-        primary_key=True)
+    medicine_id = db.Column(db.Integer, primary_key=True)
     medicine_name = db.Column(db.String(50), nullable=True)
     recommendation = db.Column(db.String(300))
 
+    prescriptionRel = db.relationship('Prescription', backref='medication')
+
 # Model many-to-many relationship between prescription and medication
-has = db.Table('has', \
-    db.Column('prescription_id', db.Integer, db.ForeignKey('prescription.prescription_id')),
-    db.Column('medicine_id', db.Integer, db.ForeignKey('medication.medicine_id'))
-)
+# has = db.Table('has', \
+#     db.Column('prescription_id', db.Integer, db.ForeignKey('prescription.prescription_id')),
+#     db.Column('medicine_id', db.Integer, db.ForeignKey('medication.medicine_id'))
+# )
 
 
 @dataclass

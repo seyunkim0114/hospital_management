@@ -8,7 +8,7 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed, Medication, has
+from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed, Medication
 from .extensions import db
 
 scheduler = BackgroundScheduler()
@@ -103,16 +103,18 @@ def getNursesResponsibleForPrescriptionNow():
     #                             .filter(Nurse.endshift < now).all()
     
     query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id, \
-        Patient.lastname, Patient.firstname, Room.room_type) \
-        .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
-            .filter(Prescription.patient_id == Patient.patient_id) \
-                .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
-                    .filter(StaysIn.room_id == Room.room_id) \
-                        .filter(Room.room_id == responsible.c.room_id) \
-                            .filter(responsible.c.clinician_id == Nurse.clinician_id) \
-                                    .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
-                                        and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
-                                            Nurse.startshift > Nurse.endshift) )).all()
+        Patient.lastname, Patient.firstname, Room.room_type, Medication.medicine_name, Medication.recommendation, \
+            Prescription.special_notes) \
+                .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
+                    .filter(Prescription.medicine_id == Medication.medicine_id) \
+                        .filter(Prescription.patient_id == Patient.patient_id) \
+                            .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
+                                .filter(StaysIn.room_id == Room.room_id) \
+                                    .filter(Room.room_id == responsible.c.room_id) \
+                                        .filter(responsible.c.clinician_id == Nurse.clinician_id) \
+                                                .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
+                                                    and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
+                                                        Nurse.startshift > Nurse.endshift) )).all()
 
     query_json = []
     for q in query:
@@ -123,7 +125,10 @@ def getNursesResponsibleForPrescriptionNow():
             "patient_id": str(q[1]),
             "room_id": str(q[2]),
             "clinician_id": str(q[3]),
-            "room_type": str(q[6])
+            "room_type": str(q[6]),
+            "medicine_name": str(q[7]),
+            "recommendation": str(q[8]),
+            "special_notes": str(q[9])
         })
 
 
@@ -209,8 +214,7 @@ def get_full_prescriptions():
 
     query = session.query(Prescription.prescription_id, Prescription.patient_id, Medication.medicine_name, \
         Medication.recommendation, Prescription.special_notes
-        ).filter(Prescription.prescription_id == has.c.prescription_id) \
-            .filter(has.c.medicine_id == Medication.medicine_id).all()
+        ).filter(Prescription.medicine_id == Medication.medicine_id).all()
 
     query_json = []
     for q in query:
