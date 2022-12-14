@@ -104,9 +104,9 @@ class StaysIn(db.Model):
 
 
 # Define Nurse.NursePositions check constraint with Enum
-class NursePositions(enum.Enum):
-    junior = "junior"
-    senior = "senior"
+# class NursePositions(enum.Enum):
+#     junior = "junior"
+#     senior = "senior"
 
 
 # Model many-to-many relationship between nurse and room
@@ -115,25 +115,74 @@ responsible = db.Table('responsible', \
     db.Column('room_id', db.Integer, db.ForeignKey(Room.room_id))
 )
 
+class ClinicianPositions(enum.Enum):
+    jn = "junior nurse"
+    sn = "senior nurse"
+    doctor = "doctor"
+
 @dataclass
-class Nurse(db.Model):
+class Clinician(db.Model):    
     clinician_id: int
     firstname: str
     lastname: str
-    position: str
+    clinician_type: str
     startshift: time
-    endshift: time
+    endshift: time  
+
+    clinician_id = db.Column(db.Integer, primary_key=True)
+    # clinician_type = db.Column(db.Enum(ClinicianPositions))
+    clinician_type = db.Column(db.String(20)) # Polymorphism discriminator
+    firstname = db.Column(db.String(20))
+    lastname = db.Column(db.String(20))
+    startshift = db.Column(db.DATETIME)
+    endshift = db.Column(db.DATETIME)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'clinician',
+        'polymorphic_on': clinician_type
+        }
+
+@dataclass
+class Doctor(Clinician):
+    clinician_id: int
+
+    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key=True)
+
+    __mapper_args__ = {'polymorphic_identity': 'doctor'}
+
+# raymond
+# didi
+# ameneh
+# andrew
+# josh?
+# daisy?
+# marina
+# thomas
+# thomas
+# steven
+# you me
+
+@dataclass
+class Nurse(Clinician):
+    clinician_id: int
+    # firstname: str
+    # lastname: str
+    # position: str
+    # startshift: time
+    # endshift: time
 
 
-    clinician_id = db.Column(db.Integer, primary_key = True)
-    firstname = db.Column(db.String)
-    lastname = db.Column(db.String)
-    position = db.Column(db.Enum(NursePositions))
-    startshift = db.Column(db.Time)
-    endshift = db.Column(db.Time)
+    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key = True)
+    # firstname = db.Column(db.String)
+    # lastname = db.Column(db.String)
+    # position = db.Column(db.Enum(NursePositions))
+    # startshift = db.Column(db.Time)
+    # endshift = db.Column(db.Time)
 
     rooms = db.relationship('Room', secondary=responsible, backref='nurse')
     completed_nurses = db.relationship('Completed', backref='nurse')
+
+    __mapper_args__ = {'polymorphic_identity': 'nurse'}
 
 @dataclass
 class Completed(db.Model):

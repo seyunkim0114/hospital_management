@@ -8,7 +8,7 @@ import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed, Medication
+from .models import Prescription, Patient, Room, responsible, Nurse, StaysIn, Completed, Medication, Clinician
 from .extensions import db
 
 scheduler = BackgroundScheduler()
