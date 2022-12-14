@@ -2,7 +2,7 @@ from flask import Flask, request, session, redirect, url_for, render_template, f
 from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime, timedelta
-
+# SEyun
 import sys
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
