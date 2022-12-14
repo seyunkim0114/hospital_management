@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes,
 import YourPatients from './components/YourPatients';
 import UpcomingPrescriptions from './components/UpcomingPrescriptions'
 import PatientsToPrescribe from './components/PatientsToPrescribe'
-
+import RegisterClinician from './components/RegisterClinician'
 function App() {
   return (
     <>
@@ -15,6 +15,7 @@ function App() {
         <Appbar/>
         <Routes>
           <Route path="/106" element={<PatientsToPrescribe/>} />
+          <Route path="/111" element={<RegisterClinician/>} />
           {/* <Redirect to="/" /> */}
         </Routes>
       </Router>

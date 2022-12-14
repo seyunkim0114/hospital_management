@@ -32,7 +32,7 @@ def create_app(test_config=None):
     
     # scheduler = BackgroundScheduler()
     scheduler.start()
-    # app.logger.info(test())
+    # app.logger.info(getNursesResponsibleForPrescriptionNow())
     atexit.register(lambda: scheduler.shutdown())  
 
     if test_config is None:
