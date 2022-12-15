@@ -37,7 +37,7 @@ const columns = [
 
 
 function handleCheckboxSelect(data) {
-    // console.log(JSON.stringify(data))
+    console.log(data)
     // e.preventDefault();
     fetch('http://localhost:5000/addlogs', {
             'method':'POST',
@@ -56,7 +56,7 @@ export default function PatientsToPrescribe() {
     // const[rows, setRows] = useState([])
     const[deletedRows, setDeletedRows] = useState([]);
     const[selectionModel, setSelectionModel] = useState([]);
-    
+    const[selectedRowData, setSelectedRowData] = useState([]);
     const rows = [];
     
     useEffect(()=>{
@@ -67,9 +67,21 @@ export default function PatientsToPrescribe() {
         })
     }, [])
 
+    // useEffect(()=>{
+    //     fetch('http://localhost:5000/addlogs', {
+    //         'method':'POST',
+    //         headers : {
+    //         'Content-Type':'application/json',
+    //         mode : 'cors',
+    //         crossDomain:true
+    //         },
+    //     body : JSON.stringify(selectedRowData)
+    //     })
+    // }, [selectedRowData, setSelectedRowData])
+
     // console.log(patients)
     patients.map(patient=>{
-        if(patient.clinician_id == 106){
+        if(patient.clinician_id == 41){
             rows.push(createPrescriptionData(patient.patient_id, patient.lastname, patient.firstname, patient.room_id, 
                 patient.prescription_id, patient.medicine_name, patient.recommendation, 
                 patient.special_notes, patient.clinician_id, patient.room_type ))
@@ -113,14 +125,15 @@ export default function PatientsToPrescribe() {
             allowDelete={true}
             checkboxSelection
             onSelectionModelChange={(ids) => {
-                const selectedIDs = new Set(ids);
+                const selectedRowID = new Set(ids);
                 const selectedRowData = rows.filter((row) => 
-                    selectedIDs.has(row.prescription_id.toString())
+                selectedRowID.has(row.prescription_id.toString())
                 );
+                // setSelectedRowData(id[0])
                 handleCheckboxSelect(selectedRowData);
-                // console.log(selectedRowData);                
+                // console.log(id);                
             }}
-            onRowSelected={handleRowSelection}
+            // onRowSelected={handleRowSelection}
         />
       
 

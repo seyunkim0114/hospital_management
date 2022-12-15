@@ -29,9 +29,9 @@ export default function CompletionLog() {
         .then(res=>res.json())
         .then((result)=>{
             setCompletions(result)
-            // console.log(result)
+            // console.log('hello', result)
         })
-    }, [])
+    })
 
     completions.map(completion=>{
         comps.push(createCompletionData(completion.completion_id, completion.patient_id, completion.lastname, 

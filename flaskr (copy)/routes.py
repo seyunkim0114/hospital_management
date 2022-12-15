@@ -7,11 +7,9 @@ import sys
 import logging
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.cron import CronTrigger
-from flask_apscheduler import APScheduler
 
 from .models import Prescription, Patient, Room, responsible, StaysIn, Completed, Medication, Clinician, Shift
 from .extensions import db
-
 
 # scheduler = BackgroundScheduler()
 main = Blueprint("main", __name__)
@@ -56,10 +54,8 @@ def getPatientsAndPrescriptions():
 @main.route("/clinician_<int:id>", methods=["GET"])
 def getClinicianById(id):
     session = db.session
-    query = session.query(Clinician.clinician_id, Clinician.lastname, Clinician.firstname, Clinician.position, \
-        Shift.startshift, Shift.endshift) \
-            .filter(Clinician.clinician_id == id) \
-                .filter(Clinician.clinician_id == Shift.clinician_id).all()
+    query = session.query(Clinician.clinician_id, Clinician.lastname, Clinician.firstname, Clinician.clinician_type, \
+        Clinician.startshift, Clinician.endshift).filter(Clinician.clinician_id == id).all()
 
     query_json = []
     for q in query:
@@ -75,17 +71,16 @@ def getClinicianById(id):
     return query_json
 
 # @scheduler.scheduled_job(trigger = 'cron', minute = '*')
-# @scheduler.scheduled_job(CronTrigger.from_crontab('* * * * *'), id='upcoming_prscp')
 @main.route("/nurses_responsible", methods=["GET"])
 def getNursesResponsibleForPrescriptionNow():
     session = db.session
-    # time_now = datetime.now()
+    now = datetime.now()
     # time_now = now.strftime("%H:%M:%S")
     # time_now = now.time()
-    time_now = datetime(2023,1,8,19,21,0,0)
-
+    time_now = datetime(2022,12,1,9,21,0,0)
+  
     ontimes =  session.query(Prescription.prescription_id, Prescription.start_date) \
-        .filter(Prescription.med_interval - func.time_to_sec(func.timediff(time_now, Prescription.start_date))/3600 % Prescription.med_interval < 10).subquery("ontimes")
+        .filter(Prescription.med_interval - func.time_to_sec(func.timediff(now, Prescription.start_date))/3600 % Prescription.med_interval < 10).subquery("ontimes")
     
     # query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id, \
     #     Patient.lastname, Patient.firstname, Room.room_type, Medication.medicine_name, Medication.recommendation, \
@@ -112,22 +107,10 @@ def getNursesResponsibleForPrescriptionNow():
                                     .filter(Room.room_id == responsible.c.room_id) \
                                         .filter(responsible.c.clinician_id == Clinician.clinician_id) \
                                             .filter(Shift.clinician_id == Clinician.clinician_id) \
-                                                .filter( or_(and_(time_now > Shift.startshift, time_now < Shift.endshift), \
+                                                .filter( or_(and_(time_now > Clinician.startshift, time_now < Shift.endshift), \
                                                     and_(not_(and_(time_now > Shift.endshift, time_now < Shift.startshift)), \
                                                         Shift.startshift > Shift.endshift) )).all()
 
-    # query = session.query(Prescription.prescription_id, Medication.medicine_id, Patient.patient_id, Room.room_id, Shift.clinician_id) \
-    #             .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
-    #                 .filter(Prescription.medicine_id == Medication.medicine_id) \
-    #                     .filter(Prescription.patient_id == Patient.patient_id) \
-    #                         .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
-    #                             .filter(StaysIn.room_id == Room.room_id) \
-    #                                 .filter(Room.room_id == responsible.c.room_id) \
-    #                                     .filter(responsible.c.clinician_id == Clinician.clinician_id) \
-    #                                         .filter(Shift.clinician_id == Clinician.clinician_id) \
-    #                                             .filter( or_(and_(time_now > Shift.startshift, time_now < Shift.endshift), \
-    #                                                 and_(not_(and_(time_now > Shift.endshift, time_now < Shift.startshift)), \
-    #                                                     Shift.startshift > Shift.endshift) )).all()
 
     query_json = []
     for q in query:
@@ -200,8 +183,6 @@ def insertCompleted():
     clinician_id = request.json[0]['clinician_id']
     prescription_id = request.json[0]['prescription_id']
     # completed_at = {"completed_at": datetime.now()}
-    # firstname = request.json["firstname"]
-    # lastname = request.json["lastname"]
     completed_at = datetime.now()
 
     completion = Completed(
@@ -210,10 +191,8 @@ def insertCompleted():
         clinician_id = clinician_id,
         prescription_id = prescription_id,
         completed_at = completed_at
-        # lastname = lastname,
-        # firstname = firstname
     )
-
+    
     session.add(completion)
     session.commit()
 
@@ -322,47 +301,3 @@ def home():
     return "helo"
 
 
-# @main.route("/authenticate", methods=['GET'])
-# def authenticate():
-#     session = db.session
-
-#     clinicianId = request.json['clinicianId']
-#     password = request.json['password']
-
-#     query = session.query(User_Auth.password, User_Auth.salt).\
-#         filter(User_Auth.clinician_id == clinicianId)
-
-#     query_json = []
-#     for q in query:
-#         query_json.append({
-#             "username": str(q[0]),
-#             "password": str(q[1]),
-#             "salt": str(q[2])
-#         })
-    
-#     return query_json['password'][0] == hashlib.sha256(query_json['salt'][0].encode() + password.encode()).hexdigest(), clinicianId
-    
-
-# @main.route("/register", methods=["POST"], strict_slashes=False)
-# def register():
-#     clinicianId = request.json['clinicianId']
-#     p = request.json['password']
-#     salt = uuid.uuid4().hex
-#     password = hashlib.sha256(salt.encode() + p.encode()).hexdigest()
-
-#     auth = User_Auth(
-#         clinicianId = clinicianId,
-#         username = username,
-#         password = password,
-#         salt = salt
-#         )
-
-#     session.add(auth)
-#     session.commit()
-
-#     return {
-#         "clinicianId": clinicianId,
-#         "username": username,
-#         "password": password,
-#         "salt": salt
-#     }

@@ -111,7 +111,7 @@ class StaysIn(db.Model):
 
 # Model many-to-many relationship between nurse and room
 responsible = db.Table('responsible', \
-    db.Column('clinician_id', db.Integer, db.ForeignKey('clinician.clinician_id')),
+    db.Column('clinician_id', db.Integer, db.ForeignKey('nurse.clinician_id')),
     db.Column('room_id', db.Integer, db.ForeignKey(Room.room_id))
 )
 
@@ -126,12 +126,12 @@ class Clinician(db.Model):
     clinician_id: int
     firstname: str
     lastname: str
-    position: str
+    clinician_type: str
     startshift: time
     endshift: time  
 
     clinician_id = db.Column(db.Integer, primary_key=True)
-    position = db.Column(db.Enum(ClinicianPositions))
+    clinician_type = db.Column(db.Enum(ClinicianPositions))
     # clinician_type = db.Column(db.String(20)) # Polymorphism discriminator
     firstname = db.Column(db.String(20))
     lastname = db.Column(db.String(20))
@@ -152,7 +152,7 @@ class Shift(db.Model):
     startshift: datetime
     endshift: datetime
 
-    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key=True)
+    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinican_id'), primary_key=True)
     startshift = db.Column(db.DATETIME)
     endshift = db.Column(db.DATETIME)
 
@@ -206,26 +206,16 @@ class Completed(db.Model):
     prescription_id: int
     completed_at: datetime
     completion_id: int
-    # firstname: str
-    # lastname: str
 
     completion_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key = True)
+    clinician_id = db.Column(db.Integer, db.ForeignKey('nurse.clinician_id'), primary_key = True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.patient_id'), primary_key=True)
     prescription_id = db.Column(db.Integer, db.ForeignKey('prescription.prescription_id'), primary_key=True)
     completed_at = db.Column(db.DATETIME, nullable=False, default=dt.now())
-    # firstname = db.Column(db.String(20))
-    # lastname = db.Column(db.String(20))
+    
 
 
 
-# @dataclass
-# class User_Auth(db.Model):
-#     clinician_id: int
-#     password: str
-#     salt: str
-
-#     clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key = True)
 
 
 

@@ -1,23 +1,91 @@
-// Code reference: https://codesandbox.io/s/signupregistration-form-reactmaterialui-fr71m?file=/src/index.js
+import { useState, useEffect } from 'react';
 
-import { useState } from 'react';
+
+
+// function addRegisteredClinician(lastname, firstname, position){
+
+//   console.log(clinician_id["clinician_id"])
+//   fetch('http://localhost:5000/newclinicians', {
+//     'method':'POST',
+//     headers : {
+//     'Content-Type':'application/json',
+//     mode : 'cors',
+//     crossDomain:true
+//     },
+//   body : JSON.stringify({
+//     lastname: lastname,
+//     firstname: firstname,
+//     clinician_id: clinician_id["clinician_id"],
+//     // username: username,
+//     // password: password,
+//     position: position
+//   })
+//   })
+// }
+
 
 export default function RegisterClinician() {
 
   // States for registration
-  const [name, setName] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [firstname, setFirstname] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [position, setPosition] = useState('');
+  const [ids, setIds] = useState([]);
 
   // States for checking the errors
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
 
+
+  // const addRegisteredClinician = () => {
+  //   // console.log("addregistered", data.target)
+  //   fetch('http://localhost:5000/newclinicians', {
+  //     'method':'POST',
+  //     headers : {
+  //     'Content-Type':'application/json',
+  //     // mode : 'cors',
+  //     // crossDomain:true
+  //     },
+  //   body : JSON.stringify({
+  //     lastname: lastname,
+  //     firstname: firstname,
+  //     // username: username,
+  //     // password: password,
+  //     position: position
+  //   })
+  //   })
+  // }
+
+  useEffect(()=>{
+    fetch("http://127.0.0.1:5000/clinician_ids")
+    .then(res=>res.json())
+    .then((result)=>{
+        setIds(result)
+        console.log(result)
+    })
+  }, [])
+
+  // const clinician_id = ids[Math.floor(Math.random()*ids.length)];
+
+
   // Handling the name change
-  const handleName = (e) => {
-    setName(e.target.value);
+  const handleLastname = (e) => {
+    setLastname(e.target.value);
     setSubmitted(false);
   };
+
+  const handleFirstname = (e) => {
+    setFirstname(e.target.value);
+    setSubmitted(false);
+  };
+
+  // Handling the position change
+  const handlePosition = (e) => {
+    setPosition(e.target.value);
+    setSubmitted(false);
+  }
 
   // Handling the email change
   const handleUsername = (e) => {
@@ -34,7 +102,7 @@ export default function RegisterClinician() {
   // Handling the form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (name === '' || username === '' || password === '') {
+    if (firstname === '' || lastname === '' || username === '' || password === '' || position === '') {
     setError(true);
     } else {
     setSubmitted(true);
@@ -50,7 +118,7 @@ export default function RegisterClinician() {
       style={{
       display: submitted ? '' : 'none',
       }}>
-      <h1>User {name} successfully registered!!</h1>
+      <h1>User {firstname} {lastname} successfully registered!!</h1>
     </div>
     );
   };
@@ -68,6 +136,9 @@ export default function RegisterClinician() {
     );
   };
 
+  
+
+
   return (
     <div className="form">
     <div>
@@ -82,11 +153,19 @@ export default function RegisterClinician() {
 
     <form>
       {/* Labels and inputs for form data */}
-      <label className="label">Name</label>
-      <input onChange={handleName} className="input"
-      value={name} type="text" />
+      <label className="label">Last Name</label>
+      <input onChange={handleLastname} className="input"
+      value={lastname} type="text" />
 
-      <label className="label">username</label>
+      <label className="label">First Name</label>
+      <input onChange={handleFirstname} className="input"
+      value={firstname} type="text" />
+
+      <label className="label">Position</label>
+      <input onChange={handlePosition} className="input"
+      value={position} type="text" />
+
+      <label className="label">Username</label>
       <input onChange={handleUsername} className="input"
       value={username} type="email" />
 
@@ -94,7 +173,10 @@ export default function RegisterClinician() {
       <input onChange={handlePassword} className="input"
       value={password} type="password" />
 
-      <button onClick={handleSubmit} className="btn" type="submit">
+      <button onClick={(e)=>{
+        handleSubmit(e); 
+        // addRegisteredClinician(lastname, firstname, position);
+      }} className="btn" type="submit">
       Submit
       </button>
     </form>

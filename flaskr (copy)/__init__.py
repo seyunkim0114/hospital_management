@@ -7,9 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 import pymysql
 from flask_cors import CORS
 
-# from apscheduler.schedulers.background import BackgroundScheduler
-# from apscheduler.triggers.cron import CronTrigger
-from flask_apscheduler import APScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+
 
 from .routes import main, getNursesResponsibleForPrescriptionNow
 from .extensions import db
@@ -17,31 +17,26 @@ from .extensions import db
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.cron import CronTrigger
 
-
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:iampw@localhost:3306/hospital_management'
+    # app.config.from_mapping(
+    #     SECRET_KEY='dev',
+    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    # )
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:iampw@localhost:3306/hospital'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     CORS(app)
     db.init_app(app)
-    # db.app = app
 
     app.register_blueprint(main)
-    # with app.app_context():
-    #     scheduler = APScheduler()
-    #     scheduler.init_app(app)
-
-    # # def scheduled():
-    # #     with app.app_context():
-    # #         getNursesResponsibleForPrescriptionNow()
-
-    #     scheduler.add_job(id = "upcoming_prscp", func=getNursesResponsibleForPrescriptionNow, trigger="interval", seconds=5)
-    #     scheduler.start()
-
+    
+    scheduler = BackgroundScheduler()
+    # scheduler.start()
+    scheduler.add_job(func=getNursesResponsibleForPrescriptionNow())
     # app.logger.info(get_newclinicians())
+    atexit.register(lambda: scheduler.shutdown())  
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -65,3 +60,4 @@ def create_app(test_config=None):
 
 
 
+# db = SQLAlchemy(app)
