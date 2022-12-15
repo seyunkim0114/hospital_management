@@ -5,16 +5,17 @@ from datetime import datetime, timedelta
 
 import sys
 import logging
-# from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.cron import CronTrigger
-from flask_apscheduler import APScheduler
+# from flask_apscheduler import APScheduler
 
 from .models import Prescription, Patient, Room, responsible, StaysIn, Completed, Medication, Clinician, Shift
 from .extensions import db
 
 
-# scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler()
 main = Blueprint("main", __name__)
+schedule_app = Flask(__name__)
 
 # Get prescription of prescription_id id
 @main.route("/prescription_<int:id>", methods=["GET"])
@@ -71,15 +72,14 @@ def getClinicianById(id):
  
     return query_json
 
-# @scheduler.scheduled_job(trigger = 'cron', minute = '*')
-# @scheduler.scheduled_job(CronTrigger.from_crontab('* * * * *'), id='upcoming_prscp')
-@main.route("/nurses_responsible", methods=["GET"])
+@main.route('/nurses_responsible', methods=['GET'])
+# @main.route("/nurses_responsible", methods=["GET"])
 def getNursesResponsibleForPrescriptionNow():
     session = db.session
     # time_now = datetime.now()
     # time_now = now.strftime("%H:%M:%S")
     # time_now = now.time()
-    time_now = datetime(2023,1,8,19,21,0,0)
+    time_now = datetime(2023,1,8,19,16,0,0)
 
     ontimes =  session.query(Prescription.prescription_id, Prescription.start_date) \
         .filter(Prescription.med_interval - func.time_to_sec(func.timediff(time_now, Prescription.start_date))/3600 % Prescription.med_interval < 10).subquery("ontimes")
@@ -127,8 +127,8 @@ def getNursesResponsibleForPrescriptionNow():
             "special_notes": str(q[9])
         })
 
-
     return query_json
+    
 
 @main.route("/completions", methods=["GET", "POST"])
 def getCompletedAll():
