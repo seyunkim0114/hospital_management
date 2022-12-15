@@ -127,8 +127,8 @@ class Clinician(db.Model):
     firstname: str
     lastname: str
     position: str
-    startshift: time
-    endshift: time  
+    startshift: datetime
+    endshift: datetime
 
     clinician_id = db.Column(db.Integer, primary_key=True)
     position = db.Column(db.Enum(ClinicianPositions))

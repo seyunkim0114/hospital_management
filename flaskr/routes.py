@@ -20,18 +20,18 @@ main = Blueprint("main", __name__)
 @main.route("/prescription_<int:id>", methods=["GET"])
 def getPrescriptionByPrescriptionId(id):
     session = db.session
-    query = session.query(Prescription.prescription_id, Prescription.medicine_name) \
-        .filter(Prescription.prescription_id == id).all()
-
-    query_json = []
-    for q in query:
-        query_json.append({
-            "prescription_id": str(q[0]),
-            "medicine_name": str(q[1])
-        })
+    # query = session.query(Prescription.prescription_id, Prescription.medicine_name) \
+    #     .filter(Prescription.prescription_id == id).all()
+    query = session.query(Prescription).filter(Prescription.prescription_id == id).all()
+    # query_json = []
+    # for q in query:
+    #     query_json.append({
+    #         "prescription_id": str(q[0]),
+    #         "medicine_name": str(q[1])
+    #     })
     
-    return query_json
-    # return jsonify(prescriptions)
+    # return query_json
+    return jsonify(query)
 
 # Get patient id, medicine name for patients who have prescriptions
 @main.route("/patients", methods=["GET"])
@@ -56,10 +56,9 @@ def getPatientsAndPrescriptions():
 @main.route("/clinician_<int:id>", methods=["GET"])
 def getClinicianById(id):
     session = db.session
-    query = session.query(Clinician.clinician_id, Clinician.lastname, Clinician.firstname, Clinician.position, \
-        Shift.startshift, Shift.endshift) \
-            .filter(Clinician.clinician_id == id) \
-                .filter(Clinician.clinician_id == Shift.clinician_id).all()
+
+    query = session.query(Clinician.clinician_id, Clinician.lastname, Clinician.firstname, Clinician.position) \
+            .filter(Clinician.clinician_id == id).all()
 
     query_json = []
     for q in query:
@@ -68,10 +67,8 @@ def getClinicianById(id):
             "firstname": str(q[1]),
             "lastname": str(q[2]),
             "position": str(q[3]),
-            "startshift": str(q[4]),
-            "endshift": str(q[5])
         })
-
+ 
     return query_json
 
 # @scheduler.scheduled_job(trigger = 'cron', minute = '*')
@@ -87,20 +84,6 @@ def getNursesResponsibleForPrescriptionNow():
     ontimes =  session.query(Prescription.prescription_id, Prescription.start_date) \
         .filter(Prescription.med_interval - func.time_to_sec(func.timediff(time_now, Prescription.start_date))/3600 % Prescription.med_interval < 10).subquery("ontimes")
     
-    # query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Nurse.clinician_id, \
-    #     Patient.lastname, Patient.firstname, Room.room_type, Medication.medicine_name, Medication.recommendation, \
-    #         Prescription.special_notes) \
-    #             .filter(ontimes.c.prescription_id == Prescription.prescription_id) \
-    #                 .filter(Prescription.medicine_id == Medication.medicine_id) \
-    #                     .filter(Prescription.patient_id == Patient.patient_id) \
-    #                         .filter(and_(Patient.patient_id == StaysIn.patient_id, StaysIn.discharged == None)) \
-    #                             .filter(StaysIn.room_id == Room.room_id) \
-    #                                 .filter(Room.room_id == responsible.c.room_id) \
-    #                                     .filter(responsible.c.clinician_id == Nurse.clinician_id) \
-    #                                             .filter( or_(and_(time_now > Nurse.startshift, time_now < Nurse.endshift), \
-    #                                                 and_(not_(and_(time_now > Nurse.endshift, time_now < Nurse.startshift)), \
-    #                                                     Nurse.startshift > Nurse.endshift) )).all()
-
     query = session.query(Prescription.prescription_id, Patient.patient_id, Room.room_id, Clinician.clinician_id, \
         Patient.lastname, Patient.firstname, Room.room_type, Medication.medicine_name, Medication.recommendation, \
             Prescription.special_notes) \
@@ -274,27 +257,6 @@ def getNewClinician():
     session.add(clinician)
     session.commit()
 
-    # if clinician_type == "doctor":
-    #     doctor = Doctor(clinician_id = clinician_id)
-    #     clinician.doctor = [doctor]
-    #     session.add(doctor)
-    #     session.commit()
-
-    # if clinician_type == "sn":
-    #     nurse = Nurse(clinician_id = clinician_id)
-    #     clinician.sn = [nurse]
-    #     session.add(nurse)
-    #     session.commit()
-        
-    # if clinician_type == "jn":
-    #     nurse = Nurse(clinician_id = clinician_id)
-    #     clinician.jn = [nurse]
-    #     session.add(nurse)
-    #     session.commit()
-
-    # session.commit()
-    # print("hello", file=sys.stderr)
-
     return {
         # "clinician_id": clinician_id,
         "lastname": lastname,
@@ -306,8 +268,7 @@ def getNewClinician():
 def getClinicianIdsAll():
     session = db.session
 
-    query = session.query(Clinician.clinician_id).filter(or_(Clinician.clinician_type == 'sn', \
-        Clinician.clinician_type == 'jn')).all()
+    query = session.query(Clinician.clinician_id).all()
     
     query_json = []
     for q in query:
