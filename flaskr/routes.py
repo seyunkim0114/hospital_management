@@ -323,7 +323,7 @@ def register():
         "salt": salt
     }
 
-@scheduler.task('interval', id="job_sync", seconds=5)
+@scheduler.task('interval', id="job_sync", hours=1)
 def upcomingTask():
     """
     Check every hour for new upcoming prescriptions
