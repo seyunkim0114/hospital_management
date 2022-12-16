@@ -219,16 +219,16 @@ class Completed(db.Model):
 
 
 
-# @dataclass
-# class User_Auth(db.Model):
-#     clinician_id: int
-#     password: str
-#     salt: str
+@dataclass
+class User_Auth(db.Model):
+    clinician_id: int
+    password: str
+    salt: str
 
-#     clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key = True)
-
-
-
+    clinician_id = db.Column(db.Integer, db.ForeignKey('clinician.clinician_id'), primary_key = True)
+    password = db.Column(db.String(64))
+    salt = db.Column(db.String(32))
+    
 
 
 

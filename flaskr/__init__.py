@@ -9,10 +9,8 @@ from flask_cors import CORS
 
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.cron import CronTrigger
-from flask_apscheduler import APScheduler
 
 from .routes import main, getNursesResponsibleForPrescriptionNow
-from .extensions import db
 
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from apscheduler.triggers.cron import CronTrigger
@@ -26,22 +24,15 @@ def create_app(test_config=None):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     CORS(app)
+
+    from .extensions import db, scheduler
     db.init_app(app)
-    # db.app = app
+    scheduler.init_app(app)
+    scheduler.start()
 
     app.register_blueprint(main)
-    # with app.app_context():
-    #     scheduler = APScheduler()
-    #     scheduler.init_app(app)
 
-    # # def scheduled():
-    # #     with app.app_context():
-    # #         getNursesResponsibleForPrescriptionNow()
-
-    #     scheduler.add_job(id = "upcoming_prscp", func=getNursesResponsibleForPrescriptionNow, trigger="interval", seconds=5)
-    #     scheduler.start()
-
-    # app.logger.info(get_newclinicians())
+    
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

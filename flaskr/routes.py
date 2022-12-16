@@ -3,19 +3,16 @@ from flask import Blueprint
 from sqlalchemy import func, text, or_, and_, not_
 from datetime import datetime, timedelta
 
+import uuid
+import hashlib
 import sys
 import logging
-from apscheduler.schedulers.background import BackgroundScheduler
-# from apscheduler.triggers.cron import CronTrigger
-# from flask_apscheduler import APScheduler
 
-from .models import Prescription, Patient, Room, responsible, StaysIn, Completed, Medication, Clinician, Shift
-from .extensions import db
+from .models import Prescription, Patient, Room, responsible, StaysIn, Completed, Medication, Clinician, Shift, User_Auth
+from .extensions import db, scheduler
 
 
-scheduler = BackgroundScheduler()
 main = Blueprint("main", __name__)
-schedule_app = Flask(__name__)
 
 # Get prescription of prescription_id id
 @main.route("/prescription_<int:id>", methods=["GET"])
@@ -283,47 +280,56 @@ def home():
     return "helo"
 
 
-# @main.route("/authenticate", methods=['GET'])
-# def authenticate():
-#     session = db.session
+@main.route("/authenticate", methods=['GET'])
+def authenticate():
+    clinicianId = request.json['clinicianId']
+    password = request.json['password']
 
-#     clinicianId = request.json['clinicianId']
-#     password = request.json['password']
+    session = db.session
+    query = session.query(User_Auth.password, User_Auth.salt).\
+        filter(User_Auth.clinician_id == clinicianId)
 
-#     query = session.query(User_Auth.password, User_Auth.salt).\
-#         filter(User_Auth.clinician_id == clinicianId)
-
-#     query_json = []
-#     for q in query:
-#         query_json.append({
-#             "username": str(q[0]),
-#             "password": str(q[1]),
-#             "salt": str(q[2])
-#         })
+    query_json = []
+    for q in query:
+        query_json.append({
+            "username": str(q[0]),
+            "password": str(q[1]),
+            "salt": str(q[2])
+        })
     
-#     return query_json['password'][0] == hashlib.sha256(query_json['salt'][0].encode() + password.encode()).hexdigest(), clinicianId
+    return query_json['password'][0] == hashlib.sha256(query_json['salt'][0].encode() + password.encode()).hexdigest(), clinicianId
     
 
-# @main.route("/register", methods=["POST"], strict_slashes=False)
-# def register():
-#     clinicianId = request.json['clinicianId']
-#     p = request.json['password']
-#     salt = uuid.uuid4().hex
-#     password = hashlib.sha256(salt.encode() + p.encode()).hexdigest()
+@main.route("/register", methods=["POST"], strict_slashes=False)
+def register():
+    clinicianId = request.json['clinicianId']
+    p = request.json['password']
+    salt = uuid.uuid4().hex
+    password = hashlib.sha256(salt.encode() + p.encode()).hexdigest()
 
-#     auth = User_Auth(
-#         clinicianId = clinicianId,
-#         username = username,
-#         password = password,
-#         salt = salt
-#         )
+    auth = User_Auth(
+        clinicianId = clinicianId,
+        # username = username,
+        password = password,
+        salt = salt
+        )
 
-#     session.add(auth)
-#     session.commit()
+    session.add(auth)
+    session.commit()
 
-#     return {
-#         "clinicianId": clinicianId,
-#         "username": username,
-#         "password": password,
-#         "salt": salt
-#     }
+    return {
+        "clinicianId": clinicianId,
+        "password": password,
+        "salt": salt
+    }
+
+@scheduler.task('interval', id="job_sync", seconds=5)
+def upcomingTask():
+    """
+    Check every hour for new upcoming prescriptions
+    """
+    print("Scheduler ")
+    with scheduler.app.app_context():
+        # db = get_schedule_db(scheduler.app.config["DATABASE"])
+        # getUpcomingPrescriptions()
+        getNursesResponsibleForPrescriptionNow()
