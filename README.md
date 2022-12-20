@@ -12,23 +12,23 @@ The project is about developing a 3rd party web application that notifies you of
 
 **How to run**
 Git clone the repository
-'''
+```
 git clone https://github.com/seyunkim0114/hospital_management.git
-'''
+```
 
 Navigate to /flaskr, install requirements, and run backend
-'''
+```
 cd flaskr
 pip install -r requirement.txt
 flask run 
 //run export FLASK_APP=__init__.py if see "cannot find flask app" error message
-'''
+```
 
 Navigate to /hospital_app to run frontend
-'''
+```
 cd ../hospital_app
 npm start
-''' 
+``` 
 
 **Data population**
 * Medication data referenced from [https://www.who.int/groups/expert-committee-on-selection-and-use-of-essential-medicines/essential-medicines-lists]
