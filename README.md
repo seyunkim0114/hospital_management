@@ -10,7 +10,7 @@ The project is about developing a 3rd party web application that notifies you of
 * Only authorized medical personnels (in this project, they are doctors and APRN nurses) can prescribe medicine
 * Clinicians can be promoted to different positions
 
-**How to run**
+**How to run**  
 Git clone the repository
 ```
 git clone https://github.com/seyunkim0114/hospital_management.git
