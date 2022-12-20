@@ -1,11 +1,11 @@
-# hospital_management
+# Prescription Tracker for Clinicians
 
 **Project Idea**  
 The project is about developing a 3rd party web application that notifies you of the upcoming medications to provide for the patients. The main users of the application are the clinicians of hospitals who prescribe and provide medications. This application also tracks the record of medications provided recently by each clinician.
 
 **Functionalities**  
 * Clinicians can log in with their username, password, and clinician id and access personalized pages for various activities.  
-* Display upcoming medications the clinicians are responsible to provide for their patients
+* Display upcoming medications the clinicians are responsible to provide for their patients by performing hourly database queries.
 * Once the medication has been provided, the users can mark it as completed and the information is automatically added to the database and shown on the page. 
 * Only authorized medical personnels (in this project, they are doctors and APRN nurses) can prescribe medicine
 * Clinicians can be promoted to different positions
